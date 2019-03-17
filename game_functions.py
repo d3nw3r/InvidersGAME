@@ -28,7 +28,7 @@ def chek_events(ship):
 
 
 def update_screen(ai_settings, screen, ship):
-    # заполняем єкран цветом bg_color
+    # заполняем экран цветом bg_color
     screen.fill(ai_settings.bg_color)
     ship.blitme()
     # отображение последнего прорисованого экрана
