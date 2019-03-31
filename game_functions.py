@@ -2,6 +2,7 @@ import sys
 import pygame
 from bullet import Bullet
 from alien import Alien
+from time import sleep
 
 
 def chek_keydown_event(event, ai_settings, screen, ship, bullets):
@@ -47,7 +48,7 @@ def update_screen(ai_settings, screen, ship, aliens, bullets):
     pygame.display.flip()
 
 
-def update_bullets(bullets):
+def update_bullets(ai_settings, screen, ship, aliens, bullets):
     """обновляет позиции пуль и уничтожает старые пули"""
     # обновление позиции пуль
     bullets.update()
@@ -56,6 +57,19 @@ def update_bullets(bullets):
     for bullet in bullets.copy():
         if bullet.rect.bottom <= 0:
             bullets.remove(bullet)
+    # проверка попадания в пришельцев
+    # при обнаружении попадания удалить пулю и пришельца
+    chek_bullet_collisions(ai_settings, screen, ship, aliens, bullets)
+
+
+def chek_bullet_collisions(ai_settings, screen, ship, aliens, bullets):
+    """Обработка колизий пуль с пришельцами"""
+    # удаление пуль и пришельцев участвующих в колизии
+    collisions = pygame.sprite.groupcollide(bullets, aliens, True, True)
+
+    if len(aliens)==0:
+        bullets.empty()
+        create_fleet(ai_settings, screen, ship, aliens)
 
 
 def fire_bullet(ai_settings, screen, ship, bullets):
@@ -115,7 +129,36 @@ def change_fleet_direction(ai_settings, aliens):
     ai_settings.fleet_direction *= -1
 
 
-def update_aliens(ai_settings, aliens):
+def ship_hit(ai_settings, stats, screen, ship, aliens, bullets):
+    """обробатывает столкновение коробля с пришельцем"""
+    stats.ship_left -= 1
+
+    # очистка списка пришельцев и пуль
+    aliens.empty()
+    bullets.empty()
+
+    # создание нового флота и размещение нового коробля в центре
+    create_fleet(ai_settings, screen, ship, aliens)
+    ship. center_ship()
+
+    # пауза
+    sleep(0.5)
+
+
+def chek_aliens_bottom(ai_settings, stats, screen, ship, aliens, bullets):
+    """проверяет добрались ли пришельці до нижнего края"""
+    screen_rect = screen.get_rect()
+    for alien in aliens.sprites():
+        if alien.rect.bottom >= screen_rect.bottom:
+            # происходит тоже что и со столкновением коробля
+            ship_hit(ai_settings, stats, screen, ship, aliens, bullets)
+            break
+
+def update_aliens(ai_settings, stats, screen, ship, aliens, bullets):
     """  проверяет достиг ли флот края экрана затем обновляет позиции всех пришельцев во флоте"""
     chek_fleet_edges(ai_settings, aliens)
     aliens.update()
+    # проверка колизий "пришелец-корабель"
+    if pygame.sprite.spritecollideany(ship, aliens):
+        ship_hit(ai_settings, stats, screen, ship, aliens, bullets)
+    chek_aliens_bottom(ai_settings, stats, screen, ship, aliens, bullets)
