@@ -23,3 +23,20 @@ class Settings():
         self.fleet_drop_speed = 10
         # fleet_direction = 1 обозначает движение в право а -1 влево
         self.fleet_direction = 1
+        # темп ускорения игры
+        self.speedup_scale = 1.1
+        self.initialize_dynamic_settings()
+
+    def initialize_dynamic_settings(self):
+        """инициализирует настройки изменяющиеся в ходе игры"""
+        self.ship_speed_factor = 1.5
+        self.bullet_speed_factor = 3
+        self.alien_speed_factor = 1
+
+        self.fleet_direction = 1
+
+    def increase_speed(self):
+        """увеличивает настройки скорости"""
+        self.ship_speed_factor *= self.speedup_scale
+        self.bullet_speed_factor *= self.speedup_scale
+        self.alien_speed_factor *= self.speedup_scale
